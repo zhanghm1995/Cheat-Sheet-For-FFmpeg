@@ -7,11 +7,16 @@ import multiprocessing
 import itertools
 import cv2
 
-g_save_root = "/data/zhanghm/LRS2"
+g_save_root = "/data/data0/zhanghm/VoxCeleb2/Wav2LipSet"
 
-
+from voxceleb_utils import get_all_videos_path
+g_mini_files = get_all_videos_path("/home/zhanghm/Datasets/VoxCeleb2/dev/mp4", 
+                            "/home/zhanghm/Research/Face/TalkNet_ASD/TalkSet/lists/lists_in/Vox_list.txt")
+    
 def extract_frames_from_single_video(fname, confidence=None):
-    dirname = '/'.join(fname.split('/')[-2:])
+    if fname in g_mini_files:
+        return
+    dirname = '/'.join(fname.split('/')[-3:])
     dirname = osp.join(g_save_root, dirname[:-4]) ## remove the .mp4
     
     os.makedirs(dirname, exist_ok=True)
@@ -19,6 +24,7 @@ def extract_frames_from_single_video(fname, confidence=None):
     fps = int(video.get(cv2.CAP_PROP_FPS))
     if fps != 25: ## If FPS is not 25, we should return this file
         print(f"{fname} FPS is not 25 it's {fps}")
+        return
 
     nDataLoaderThread = 16
     output_dir = osp.join(dirname, '%06d.jpg')
@@ -54,10 +60,16 @@ def extract_frames_multiple_threads(files_list, number_of_cpus):
 
 if __name__ == "__main__":
     input_dir = "/data/zhanghm/LRS2_dataset/mvlrs_v1/main"
+    input_dir = "/home/zhanghm/Datasets/VoxCeleb2/dev/mp4"
 
-    files = glob.glob(f'{input_dir}/*/*.mp4')
+    files = glob.glob(f'{input_dir}/*/*/*.mp4')
+
+    files = files[:30000]
+
     print(len(files))
-    print(files[:3])
+    print(files[:5])
+
+    
 
     extract_frames_multiple_threads(files, 64)
     # extract_frames_from_single_video(files[0])
